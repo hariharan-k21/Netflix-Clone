@@ -131,6 +131,12 @@ Install:
 
     Docker Pipeline
 
+    Prometheus Metrics Plugin
+
+    Docker Build
+
+    Docker API
+
 Configure Tools
 
 Go to:
@@ -567,6 +573,21 @@ sudo install minikube-linux-amd64 /usr/local/bin/minikube && rm minikube-linux-a
 sudo usermod -aG docker $USER && newgrp docker
 
 minikube start --driver=docker
+
+To begin monitoring your Kubernetes cluster, you'll install the Prometheus Node Exporter. This component allows you to collect system-level metrics from your cluster nodes. Here are the steps to install the Node Exporter using Helm:
+
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+
+kubectl create namespace prometheus-node-exporter
+
+helm install prometheus-node-exporter prometheus-community/prometheus-node-exporter --namespace prometheus-node-exporter
+
+Update your Prometheus configuration (prometheus.yml) to add a new job for scraping metrics from localhost:9001/metrics. You can do this by adding the following configuration to your prometheus.yml file:
+
+  - job_name: 'Netflix'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['localhost:9100']
 
 Install ArgoCD
 
