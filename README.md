@@ -1,6 +1,9 @@
 # 🚀 Netflix Clone DevSecOps CI/CD Pipeline (Jenkins + SonarQube + Trivy + Docker + Prometheus + Grafana + ArgoCD)
 
-This README provides the complete step-by-step guide to deploy **Netflix Clone** on the cloud using **Jenkins**, **SonarQube**, **Trivy**, **Docker**, **Prometheus + Grafana**, and **ArgoCD**.
+This README provides the complete step-by-step guide to deploy **Netflix Clone** using **Jenkins**, **SonarQube**, **Trivy**, **Docker**, **Prometheus + Grafana**, and **ArgoCD**.
+
+> ⚠️ **Note:** You can run this setup on **AWS EC2** or on a **local Linux machine**.  
+> This guide assumes a local Linux machine for learning purposes.
 
 ---
 
@@ -19,9 +22,9 @@ This README provides the complete step-by-step guide to deploy **Netflix Clone**
 
 # ✅ Prerequisites
 
-- AWS EC2 Instance (Ubuntu 22.04)
+- Ubuntu 22.04 (Local Linux machine or AWS EC2)
 - GitHub repository: `https://github.com/hariharan-k21/Netflix-Clone.git`
-- Public IP & Security group open ports:
+- Ports to be open:
   - Jenkins: **8080**
   - SonarQube: **9000**
   - ArgoCD: **8888**
@@ -33,21 +36,14 @@ This README provides the complete step-by-step guide to deploy **Netflix Clone**
 
 # 🔥 Phase 1: Initial Setup and Deployment
 
-## Step 1: Launch EC2 (Ubuntu 22.04)
-
-- Launch EC2 instance  
-- SSH into the instance
+## Step 1: Install Git & Clone Code
 
 ```bash
-ssh ubuntu@<public-ip>
-
-Step 2: Clone the Code
-
 sudo apt update && sudo apt upgrade -y
 git clone https://github.com/hariharan-k21/Netflix-Clone.git
 cd Netflix-Clone
 
-Step 3: Install Docker & Run App
+Step 2: Install Docker & Run App
 
 sudo apt-get update
 sudo apt-get install -y docker.io
@@ -62,7 +58,7 @@ docker run -d --name netflix -p 8081:80 netflix:latest
 
     ⚠️ App will fail due to missing TMDB API key.
 
-Step 4: Get TMDB API Key
+Step 3: Get TMDB API Key
 
     Go to TMDB website
 
@@ -83,7 +79,7 @@ docker run -d --name sonar -p 9000:9000 sonarqube:lts-community
 
 Access:
 
-http://<public-ip>:9000
+http://localhost:9000
 
 Login:
 
@@ -115,7 +111,7 @@ sudo systemctl enable jenkins
 
 Access Jenkins:
 
-http://<public-ip>:8080
+http://localhost:8080
 
 Install Jenkins Plugins
 
@@ -155,7 +151,7 @@ Create SonarQube Project
 
 Open SonarQube UI:
 
-http://<public-ip>:9000
+http://localhost:9000
 
 Login: admin/admin
 
@@ -210,7 +206,7 @@ Add webhook:
 
     URL:
 
-http://<jenkins-ip>:8080/sonarqube-webhook/
+http://localhost:8080/sonarqube-webhook/
 
 🔍 Jenkinsfile Scripts
 Jenkinsfile 1 (Phase 1)
@@ -462,7 +458,7 @@ sudo systemctl status prometheus
 
 Access:
 
-http://<public-ip>:9090
+http://localhost:9090
 
 Install Node Exporter
 
@@ -521,7 +517,7 @@ scrape_configs:
   - job_name: 'jenkins'
     metrics_path: '/prometheus'
     static_configs:
-      - targets: ['<jenkins-ip>:8080']
+      - targets: ['localhost:8080']
 
 Check config:
 
@@ -545,7 +541,7 @@ sudo systemctl status grafana-server
 
 Access:
 
-http://<public-ip>:3000
+http://localhost:3000
 
 Login:
 
@@ -600,7 +596,7 @@ admin / <password>
 
 🧹 Phase 6: Cleanup
 
-Terminate EC2 instance if not needed.
+Terminate or stop services if not needed.
 🎉 Done!
 
 Your project is now fully automated with:
