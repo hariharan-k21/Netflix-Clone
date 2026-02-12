@@ -13,7 +13,10 @@
 - Clone your application's code repository onto the EC2 instance:
     
     ```bash
-    git clone https://github.com/hariharan-k21/Netflix-Clone.git
+    sudo apt update && sudo apt upgrade -y 
+    git clone https://github.com/hariharan-k21/Netflix-Clone.git  
+    cd Netflix-Clone
+
     ```
     
 
@@ -24,10 +27,11 @@
     ```bash
     
     sudo apt-get update
-    sudo apt-get install docker.io -y
-    sudo usermod -aG docker $USER  # Replace with your system's username, e.g., 'ubuntu'
-    newgrp docker
-    sudo chmod 777 /var/run/docker.sock
+    sudo apt-get install -y docker.io
+    sudo usermod -aG docker $USER  # Add your username to the Docker group, system username eg.ubuntu
+    newgrp docker  # Apply changes
+    sudo chmod 777 /var/run/docker.sock  # Adjust permissions for Docker socket
+
     ```
     
 - Build and run your application using Docker containers:
@@ -79,12 +83,13 @@ docker build --build-arg TMDB_V3_API_KEY=<your-api-key> -t netflix .
         wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
         echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main | sudo tee -a /etc/apt/sources.list.d/trivy.list
         sudo apt-get update
-        sudo apt-get install trivy        
+        sudo apt-get install trivy
+     
         ```
         
         to scan image using trivy
         ```
-        trivy image <imageid>
+        trivy image <docker-imageid>
         ```
         
         
@@ -100,22 +105,18 @@ docker build --build-arg TMDB_V3_API_KEY=<your-api-key> -t netflix .
     
     ```bash
     sudo apt update
-    sudo apt install fontconfig openjdk-17-jre
-    java -version
-    openjdk version "17.0.8" 2023-07-18
-    OpenJDK Runtime Environment (build 17.0.8+7-Debian-1deb12u1)
-    OpenJDK 64-Bit Server VM (build 17.0.8+7-Debian-1deb12u1, mixed mode, sharing)
+    sudo apt install fontconfig openjdk-17-jre -y
+    java -version  # Verify Java version
+
     
     #jenkins
-    sudo wget -O /usr/share/keyrings/jenkins-keyring.asc \
-    https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
-    echo deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] \
-    https://pkg.jenkins.io/debian-stable binary/ | sudo tee \
-    /etc/apt/sources.list.d/jenkins.list > /dev/null
+    sudo wget -O /usr/share/keyrings/jenkins-keyring.asc https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
+    echo deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/ | sudo tee /etc/apt/sources.list.d/jenkins.list > /dev/null
     sudo apt-get update
-    sudo apt-get install jenkins
+    sudo apt-get install jenkins -y
     sudo systemctl start jenkins
     sudo systemctl enable jenkins
+
     ```
     
     - Access Jenkins in a web browser using the public IP of your EC2 instance.
