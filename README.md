@@ -165,25 +165,30 @@ Create a Jenkins webhook
 ```groovy
 pipeline {
     agent any
+
     tools {
-        jdk 'jdk17'
-        nodejs 'node16'
+        jdk 'jdk17' // Make sure JDK 17 is installed in Jenkins tools
+        nodejs 'node16' // Ensure Node.js version 16 is installed in Jenkins tools
     }
+
     environment {
-        SCANNER_HOME = tool 'sonar-scanner'
+        SCANNER_HOME = tool 'sonar-scanner' // Set Sonar Scanner as an environment variable
     }
+
     stages {
-        stage('clean workspace') {
+        stage('Clean Workspace') {
             steps {
-                cleanWs()
+                cleanWs() // Clean the workspace to avoid conflicts from previous builds
             }
         }
+
         stage('Checkout from Git') {
             steps {
                 git branch: 'main', url: 'https://github.com/hariharan-k21/Netflix-Clone.git'
             }
         }
-        stage("Sonarqube Analysis") {
+
+        stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('sonar-server') {
                     sh '''$SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=Netflix \
@@ -191,20 +196,33 @@ pipeline {
                 }
             }
         }
-        stage("quality gate") {
+
+        stage('Quality Gate') {
             steps {
                 script {
+                    // Wait for the SonarQube quality gate to pass
                     waitForQualityGate abortPipeline: false, credentialsId: 'Sonar-token'
                 }
             }
         }
+
         stage('Install Dependencies') {
             steps {
+                // Install project dependencies using npm
                 sh "npm install"
             }
         }
     }
+
+    post {
+        // This will run regardless of the pipeline result
+        always {
+            echo 'Cleaning up after the build'
+            cleanWs() // Always clean the workspace to ensure a fresh environment for the next build
+        }
+    }
 }
+
 ```
 
 Certainly, here are the instructions without step numbers:
@@ -255,26 +273,37 @@ Now, you have installed the Dependency-Check plugin, configured the tool, and ad
 
 pipeline {
     agent any
+
     tools {
+        // Make sure these tools are configured in Jenkins (Manage Jenkins → Global Tool Configuration)
         jdk 'jdk17'
         nodejs 'node16'
     }
+
     environment {
+        // Sets the path for Sonar Scanner tool installed in Jenkins
         SCANNER_HOME = tool 'sonar-scanner'
     }
 
     stages {
 
         stage('Clean Workspace') {
-            steps { cleanWs() }
+            steps {
+                // Deletes previous build files to ensure clean build
+                cleanWs()
+            }
         }
 
         stage('Checkout from Git') {
-            steps { git branch: 'main', url: 'https://github.com/hariharan-k21/Netflix-Clone.git' }
+            steps {
+                // Clones the project repository from GitHub
+                git branch: 'main', url: 'https://github.com/hariharan-k21/Netflix-Clone.git'
+            }
         }
 
         stage('Sonarqube Analysis') {
             steps {
+                // Inject SonarQube env variables (server URL, token etc.)
                 withSonarQubeEnv('sonar-server') {
                     sh """
                         $SCANNER_HOME/bin/sonar-scanner \
@@ -288,7 +317,10 @@ pipeline {
         stage('Quality Gate') {
             steps {
                 script {
+                    // Wait for SonarQube quality gate result
                     def qg = waitForQualityGate()
+
+                    // If Quality Gate fails, mark build as UNSTABLE
                     if (qg.status != 'OK') {
                         currentBuild.result = 'UNSTABLE'
                     }
@@ -298,6 +330,7 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
+                // Install node modules required for build
                 sh "npm install"
             }
         }
@@ -305,13 +338,17 @@ pipeline {
         stage('OWASP FS SCAN') {
             steps {
                 script {
+                    // Run OWASP Dependency Check and store exit code
                     def rc = sh(
                         script: "dependencyCheck --scan ./ --disableYarnAudit --disableNodeAudit --format ALL --out dependency-check-report",
                         returnStatus: true
                     )
+
+                    // If dependency-check is not installed, skip this stage
                     if (rc != 0) {
                         echo "Dependency-Check not installed. Skipping this stage."
                     } else {
+                        // Publish the report to Jenkins
                         dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
                     }
                 }
@@ -321,6 +358,7 @@ pipeline {
         stage('TRIVY FS SCAN') {
             steps {
                 script {
+                    // Run Trivy filesystem scan and store results
                     catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
                         sh "trivy fs . > trivyfs.txt"
                     }
@@ -331,9 +369,16 @@ pipeline {
         stage('Docker Build & Push') {
             steps {
                 script {
+                    // Login to Docker Hub using Jenkins credentials
                     withDockerRegistry(credentialsId: 'docker', toolName: 'docker') {
+
+                        // Build Docker image with TMDB API key
                         sh "docker build --build-arg TMDB_V3_API_KEY=<USE_YOUR_OWN_API_KEY_FROM_TMDB> -t netflix ."
+
+                        // Tag the image
                         sh "docker tag netflix hariharank21/netflix:latest"
+
+                        // Push to Docker Hub
                         sh "docker push hariharank21/netflix:latest"
                     }
                 }
@@ -343,6 +388,7 @@ pipeline {
         stage('TRIVY Image Scan') {
             steps {
                 script {
+                    // Scan Docker image for vulnerabilities
                     catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
                         sh "trivy image hariharank21/netflix:latest > trivyimage.txt"
                     }
@@ -352,6 +398,7 @@ pipeline {
 
         stage('Deploy to container') {
             steps {
+                // Run Docker container from the pushed image
                 sh "docker run -d --name netflix -p 8081:80 hariharank21/netflix:latest"
             }
         }
