@@ -93,6 +93,10 @@ echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main |
 sudo apt-get update
 sudo apt-get install trivy
 
+Scanning Image using Trivy:
+
+Command: trivy image <docker-imageid>
+
 🧪 Phase 3: CI/CD Setup (Jenkins)
 Install Java
 
