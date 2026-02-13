@@ -174,6 +174,7 @@ Add in Jenkins:
 Manage Jenkins → Credentials → Add Secret Text
 
 ID: Sonar-token
+
 DockerHub PAT (Important)
 
 Go to DockerHub:
@@ -407,6 +408,12 @@ pipeline {
     }
 }
 
+If you face any Docker Related Errors, after above Pipeline, run the following commands on your local machine:
+
+sudo su
+sudo usermod -aG docker jenkins
+sudo systemctl restart jenkins
+
 🔍 Phase 4: Monitoring (Prometheus + Grafana)
 
 Install Prometheus
@@ -609,7 +616,7 @@ admin / <password>
 
 ⚙️ Manual Sync (for learning purpose)
 
-    Keep auto-sync OFF. You will manually sync apps to deploy updates.
+Keep auto-sync OFF. You will manually sync apps to deploy updates.
 
 🧹 Phase 6: Cleanup
 
