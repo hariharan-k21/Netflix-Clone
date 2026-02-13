@@ -2,23 +2,11 @@
 
 This README provides the complete step-by-step guide to deploy **Netflix Clone** using **Jenkins**, **SonarQube**, **Trivy**, **Docker**, **Prometheus + Grafana**, and **ArgoCD**.
 
-> ⚠️ **Note:** You can run this setup on **AWS EC2** or on a **local Linux machine**.  
+> ⚠️ **Note:** You can run this setup on **AWS EC2** or on a **Local Linux Machine**.  
 > This guide assumes a local Linux machine for learning purposes.
 
 ---
 
-## 📌 Table of Contents
-
-1. [Prerequisites](#prerequisites)  
-2. [Phase 1: Initial Setup](#phase-1-initial-setup)  
-3. [Phase 2: Security Tools Setup](#phase-2-security-tools-setup)  
-4. [Phase 3: CI/CD Setup (Jenkins)](#phase-3-cicd-setup-jenkins)  
-5. [Phase 4: Monitoring (Prometheus + Grafana)](#phase-4-monitoring-prometheus--grafana)  
-6. [Phase 5: Kubernetes + ArgoCD](#phase-5-kubernetes--argocd)  
-7. [Phase 6: Cleanup](#phase-6-cleanup)  
-8. [Jenkinsfile Scripts](#jenkinsfile-scripts)
-
----
 
 # ✅ Prerequisites
 
@@ -39,7 +27,7 @@ This README provides the complete step-by-step guide to deploy **Netflix Clone**
 ## Step 1: Install Git & Clone Code
 
 ```bash
-sudo apt update && sudo apt upgrade -y
+sudo apt update && sudo apt upgrade && sudo apt install git -y
 git clone https://github.com/hariharan-k21/Netflix-Clone.git
 cd Netflix-Clone
 
@@ -167,6 +155,8 @@ Login: admin/admin
 
 Create Project:
 
+For this use Choose form Local in SonarQube, Select OS and Program Runtime.
+
     Project Name: Netflix
 
     Project Key: Netflix
@@ -214,9 +204,9 @@ Add webhook:
 
     Name: Jenkins
 
-    URL:
-
-http://localhost:8080/sonarqube-webhook/
+    URL: http://localhost:8080/sonarqube-webhook/
+    
+From above URL, localhost won't work for setting up webhook in SonarQube, use the command hostname -I in your local machine, and put your machine's IP Address, you can verify by, it will return Jenkins Page.
 
 🔍 Jenkinsfile Scripts
 Jenkinsfile 1 (Phase 1)
@@ -418,6 +408,7 @@ pipeline {
 }
 
 🔍 Phase 4: Monitoring (Prometheus + Grafana)
+
 Install Prometheus
 
 sudo useradd --system --no-create-home --shell /bin/false prometheus
@@ -566,9 +557,10 @@ URL: http://localhost:9090
 
 Import Dashboard:
 
-Create → Import → Dashboard ID: 1860
+Create → Import → Dashboard ID: <dashboard-id>, download the JSON and put the contents in the Grafana's JSON Space.
 
 🧩 Phase 5: Kubernetes + ArgoCD (Manual Sync)
+
 Install Minikube
 
 curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
@@ -578,7 +570,7 @@ sudo usermod -aG docker $USER && newgrp docker
 
 minikube start --driver=docker
 
-To begin monitoring your Kubernetes cluster, you'll install the Prometheus Node Exporter. This component allows you to collect system-level metrics from your cluster nodes. Here are the steps to install the Node Exporter using Helm:
+To begin monitoring your Kubernetes cluster, you'll install the Prometheus Node Exporter. This component allows you to collect system-level metrics from your cluster nodes. In Minikube HELM is installed by default, if not install HELM by referring official documentation Here are the steps to install the Node Exporter using HELM:
 
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 
@@ -622,13 +614,4 @@ admin / <password>
 🧹 Phase 6: Cleanup
 
 Terminate or stop services if not needed.
-🎉 Done!
 
-Your project is now fully automated with:
-
-✔️ SonarQube
-✔️ Jenkins CI/CD
-✔️ Docker Build & Push
-✔️ Trivy + Dependency-Check
-✔️ Prometheus + Grafana Monitoring
-✔️ ArgoCD (Manual Sync)
